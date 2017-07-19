@@ -3,7 +3,7 @@
   <connectionStrings>
     <add
       name="Databasic.Example.MySql"
-      connectionString="server=127.0.0.1;uid=USER_NAME;pwd=1234;database=PASSWORD;"
+      connectionString="server=127.0.0.1;port=3306;uid=USER_NAME;pwd=PASSWORD;database=DATABASE;"
       providerName="MySql.Data.MySqlClient"
       xdt:Transform="Remove"
       xdt:Locator="Match(name)" />
