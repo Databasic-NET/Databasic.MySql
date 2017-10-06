@@ -78,6 +78,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="SqlError.vb" />
     <Compile Include="ProviderResource.vb" />
     <Compile Include="Statement.vb" />
     <Compile Include="Transaction.vb" />

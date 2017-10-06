@@ -23,11 +23,20 @@ Public Class Connection
         AddHandler Me._provider.InfoMessage, AddressOf Connection.errorHandler
     End Sub
 
-    Public Overrides Function CreateAndBeginTransaction(Optional transactionName As String = "", Optional isolationLevel As IsolationLevel = IsolationLevel.Unspecified) As Databasic.Transaction
-        Return New Transaction() With {
+    Protected Shared Sub errorHandler(sender As Object, args As MySqlInfoMessageEventArgs)
+        Dim sqlErrors As Databasic.SqlErrorsCollection = New SqlErrorsCollection()
+        For index = 0 To args.errors.Length - 1
+            sqlErrors.Add(New Databasic.MySql.SqlError(args.errors(index)))
+        Next
+        Databasic.Events.RaiseError(sqlErrors)
+    End Sub
+
+    Protected Overrides Function createAndBeginTransaction(Optional transactionName As String = "", Optional isolationLevel As IsolationLevel = IsolationLevel.Unspecified) As Databasic.Transaction
+        Me.OpenedTransaction = New Transaction() With {
             .ConnectionWrapper = Me,
             .Instance = Me._provider.BeginTransaction(isolationLevel)
         }
+        Return Me.OpenedTransaction
     End Function
 
 End Class

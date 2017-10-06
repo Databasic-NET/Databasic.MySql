@@ -31,22 +31,51 @@
 		Return Databasic.Statement.Prepare("SELECT LAST_INSERT_ID()", transaction).FetchOne().ToInstance(Of Object)()
 	End Function
 
-	'Public Overrides Function GetAll(
-	'		connection As Databasic.Connection,
-	'		columns As String,
-	'		table As String,
-	'		Optional offset As Int64? = Nothing,
-	'		Optional limit As Int64? = Nothing,
-	'		Optional orderByStatement As String = ""
-	'	) As Databasic.Statement
-	'	Dim sql = $"SELECT {columns} FROM {table}"
-	'	offset = If(offset, 0)
-	'	limit = If(limit, 0)
-	'	If limit > 0 Then
-	'		sql += If(orderByStatement.Length > 0, " ORDER BY " + orderByStatement, "") +
-	'				$" LIMIT {If(limit = 0, "18446744073709551615", limit.ToString())} OFFSET {offset}"
-	'	End If
-	'	Return Databasic.Statement.Prepare(sql, connection).FetchAll()
-	'End Function
+    'Public Overrides Function GetAll(
+    '		connection As Databasic.Connection,
+    '		columns As String,
+    '		table As String,
+    '		Optional offset As Int64? = Nothing,
+    '		Optional limit As Int64? = Nothing,
+    '		Optional orderByStatement As String = ""
+    '	) As Databasic.Statement
+    '	Dim sql = $"SELECT {columns} FROM {table}"
+    '	offset = If(offset, 0)
+    '	limit = If(limit, 0)
+    '	If limit > 0 Then
+    '		sql += If(orderByStatement.Length > 0, " ORDER BY " + orderByStatement, "") +
+    '				$" LIMIT {If(limit = 0, "18446744073709551615", limit.ToString())} OFFSET {offset}"
+    '	End If
+    '	Return Databasic.Statement.Prepare(sql, connection).FetchAll()
+    'End Function
+
+    Public Overridable Function GetList(
+        conditionSqlStatement As String,
+        conditionParams As Object,
+        orderBySqlStatement As String,
+        offset As Int64?,
+        limit As Int64?,
+        connectionOrTransaction As Object,
+        ByRef classMetaDescription As MetaDescription
+    ) As Databasic.Statement
+        Dim columns As String = String.Join(",", Databasic.ProviderResource.ColumnsArray(classMetaDescription.ClassType, 0))
+        Dim sql As String = $"SELECT {columns} FROM {ActiveRecord.Resource.Table(classMetaDescription)}"
+        Dim params As Object = Nothing
+        If Not String.IsNullOrEmpty(conditionSqlStatement) Then
+            sql += " WHERE " + conditionSqlStatement
+            params = conditionParams
+        End If
+        If Not String.IsNullOrEmpty(orderBySqlStatement) Then
+            sql += " ORDER BY " + orderBySqlStatement
+        End If
+        If offset.HasValue Then
+            ' offset a number, but could be 0, limit is unknown
+            sql += $" LIMIT {If(Not limit.HasValue, "18446744073709551615", limit.ToString())} OFFSET {offset}"
+        ElseIf limit.HasValue And limit > 0 Then
+            ' offset is null, limit is a number, but could be 0
+            sql += $" LIMIT {limit.ToString()}"
+        End If
+        Return Databasic.Statement.Prepare(sql, connectionOrTransaction).FetchAll(params)
+    End Function
 
 End Class

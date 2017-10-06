@@ -4,7 +4,7 @@
     <clear xdt:Transform="InsertIfMissing" />
     <add
       name="Databasic.Example.MySql"
-      connectionString="server=127.0.0.1;port=3306;uid=USER_NAME;pwd=PASSWORD;database=DATABASE;"
+      connectionString="server=localhost;port=3306;uid=USER_NAME;pwd=PASSWORD;database=DATABASE;"
       providerName="MySql.Data.MySqlClient"
       xdt:Transform="InsertIfMissing"
       xdt:Locator="Match(name)" />
