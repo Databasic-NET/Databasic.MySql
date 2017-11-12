@@ -1,4 +1,4 @@
-﻿Imports System.ComponentModel
+Imports System.ComponentModel
 Imports System.Data.Common
 Imports MySql.Data.MySqlClient
 
@@ -74,9 +74,13 @@ Public Class Statement
             Dim sqlParamValue As Object
             For Each prop As PropertyDescriptor In TypeDescriptor.GetProperties(sqlParams)
                 sqlParamValue = prop.GetValue(sqlParams)
+                If (sqlParamValue Is Nothing) Then
+                    sqlParamValue = DBNull.Value
+                Else
+                    sqlParamValue = Me.getPossibleUnderlyingEnumValue(sqlParamValue)
+                End If
                 Me._cmd.Parameters.AddWithValue(
-                    prop.Name,
-                    If((sqlParamValue Is Nothing), DBNull.Value, sqlParamValue)
+                    prop.Name, sqlParamValue
                 )
             Next
         End If
@@ -86,12 +90,17 @@ Public Class Statement
     ''' </summary>
     ''' <param name="sqlParams">Dictionary with named keys as MySQL/MariaDB statement params without any '@' chars in dictionary keys.</param>
     Protected Overrides Sub addParamsWithValue(sqlParams As Dictionary(Of String, Object))
+        Dim sqlParamValue As Object
         If (Not sqlParams Is Nothing) Then
             For Each pair As KeyValuePair(Of String, Object) In sqlParams
+                If (pair.Value Is Nothing) Then
+                    sqlParamValue = DBNull.Value
+                Else
+                    sqlParamValue = Me.getPossibleUnderlyingEnumValue(pair.Value)
+                End If
                 Me._cmd.Parameters.AddWithValue(
-                  pair.Key,
-                  If((pair.Value Is Nothing), DBNull.Value, pair.Value)
-                 )
+                    pair.Key, sqlParamValue
+                )
             Next
         End If
     End Sub
